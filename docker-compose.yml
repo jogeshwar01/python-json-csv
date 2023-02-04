@@ -1,0 +1,49 @@
+services:
+  postgres:
+    container_name: postgres_container
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: test_db
+    ports:
+      - "5440:5432"
+    networks:
+      - app-tier
+    volumes:
+       - postgres:/data/postgres
+       - .:/home:rw
+      
+  pgadmin:
+    container_name: pgadmin4_container
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "5050:80"
+    networks:
+      - app-tier
+    volumes:
+       - pgadmin:/var/lib/pgadmin
+
+  python_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    networks:
+      - app-tier
+    command:
+      tail -f /dev/null
+
+volumes:
+    postgres:
+    pgadmin:
+
+networks:
+  app-tier:
+    driver: bridge
